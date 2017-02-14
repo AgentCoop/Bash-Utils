@@ -16,6 +16,11 @@ is_corrupted() {
     fi
 }
 
+get_aspect_ratio() {
+    local input="$1"
+    echo $(ffprobe "$input" 2>&1 | awk 'match($0, /DAR\s+([0-9]+:[0-9]+)/, m) { print m[1] }')
+}
+
 get_video_res_y() {
     local input="$1"
 

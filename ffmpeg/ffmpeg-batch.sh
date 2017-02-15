@@ -187,6 +187,8 @@ while getopts ":f:" opt; do
                     exit 1
                 ;;
             esac
+            shift
+            shift
         ;;
     esac
 done

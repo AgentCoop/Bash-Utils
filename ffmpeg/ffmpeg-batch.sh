@@ -163,6 +163,9 @@ entrypoint() {
 
 }
 
+INPUT="$1"
+shift
+
 while getopts ":f:" opt; do
     case $opt in
         f)
@@ -193,4 +196,4 @@ while getopts ":f:" opt; do
     esac
 done
 
-entrypoint "$@"
+entrypoint "$INPUT"

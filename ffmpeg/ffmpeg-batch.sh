@@ -2,6 +2,8 @@
 
 set -ex
 
+PADDING_FILTER="-vf pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2,scale="
+
 is_corrupted() {
     local input="$1"
     
@@ -80,7 +82,15 @@ convert-480p() {
     if [[ $resy -gt 360 ]] && [[ ! $resy -eq 480 ]]; then
             /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 -vf scale=854:480 "$output"
     elif [[ $resy -eq 480 ]]; then
-        /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 "$output"
+        local ratio=$(get_aspect_ratio "$input")
+
+        if [[ ratio == 4:3 ]]; then
+            local filter="$PADDING_FILTER"854:480
+        else
+            local filter=
+        fi
+
+        /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 "$filter" "$output"
     fi
 }
 

@@ -138,45 +138,57 @@ convert-1080p() {
     fi
 }
 
+
+while getopts ":f:" opt; do
+    case $opt in
+        f)
+            case $OPTARG in
+                240)
+                    CONVERT_240=true
+                ;;
+                360)
+                    CONVERT_360=true
+                ;;
+                480)
+                    CONVERT_480=true
+                ;;
+                720)
+                    CONVERT_720=true
+                ;;
+                1080)
+                    CONVERT_1080=true
+                ;;
+                *)
+                    echo 'Invalid video format'
+                    exit 1
+                ;;
+            esac
+        ;;
+    esac
+done
+
 entrypoint() {
     local input="$1"
 
-    if [[ $# -eq 1 ]]; then
+    if [[ CONVERT_240 = true ]]; then
         convert-240p "$input"
-        convert-360p "$input"
-        convert-480p "$input"
-        convert-720p "$input"
-        convert-1080p "$input"
-        exit 0
     fi
 
-    while getopts ":f:" opt; do
-        case $opt in
-            f)
-                case $OPTARG in
-                    240)
-                        convert-240p "$input"
-                    ;;
-                    360)
-                        convert-360p "$input"
-                    ;;
-                    480)
-                        convert-480p "$input"
-                    ;;
-                    720)
-                        convert-720p "$input"
-                    ;;
-                    1080)
-                        convert-1080p "$input"
-                    ;;
-                    *)
-                        echo 'Invalid video format'
-                        exit 1
-                    ;;
-                esac
-            ;;
-        esac
-    done
+    if [[ CONVERT_360 = true ]]; then
+        convert-360p "$input"
+    fi
+
+    if [[ CONVERT_480 = true ]]; then
+        convert-480p "$input"
+    fi
+
+    if [[ CONVERT_720 = true ]]; then
+        convert-720p "$input"
+    fi
+
+    if [[ CONVERT_1080 = true ]]; then
+        convert-1080p "$input"
+    fi
 
 }
 

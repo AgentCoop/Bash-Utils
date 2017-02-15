@@ -84,7 +84,7 @@ convert-480p() {
     elif [[ $resy -eq 480 ]]; then
         local ratio=$(get_aspect_ratio "$input")
 
-        if [[ ratio == 4:3 ]]; then
+        if [[ $ratio == 4:3 ]]; then
             local filter="$PADDING_FILTER"854:480
         else
             local filter=
@@ -141,23 +141,23 @@ convert-1080p() {
 entrypoint() {
     local input="$1"
 
-    if [[ CONVERT_240 = true ]]; then
+    if [[ $CONVERT_240 = true ]]; then
         convert-240p "$input"
     fi
 
-    if [[ CONVERT_360 = true ]]; then
+    if [[ $CONVERT_360 = true ]]; then
         convert-360p "$input"
     fi
 
-    if [[ CONVERT_480 = true ]]; then
+    if [[ $CONVERT_480 = true ]]; then
         convert-480p "$input"
     fi
 
-    if [[ CONVERT_720 = true ]]; then
+    if [[ $CONVERT_720 = true ]]; then
         convert-720p "$input"
     fi
 
-    if [[ CONVERT_1080 = true ]]; then
+    if [[ $CONVERT_1080 = true ]]; then
         convert-1080p "$input"
     fi
 

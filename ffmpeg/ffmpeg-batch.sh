@@ -138,6 +138,30 @@ convert-1080p() {
     fi
 }
 
+entrypoint() {
+    local input="$1"
+
+    if [[ CONVERT_240 = true ]]; then
+        convert-240p "$input"
+    fi
+
+    if [[ CONVERT_360 = true ]]; then
+        convert-360p "$input"
+    fi
+
+    if [[ CONVERT_480 = true ]]; then
+        convert-480p "$input"
+    fi
+
+    if [[ CONVERT_720 = true ]]; then
+        convert-720p "$input"
+    fi
+
+    if [[ CONVERT_1080 = true ]]; then
+        convert-1080p "$input"
+    fi
+
+}
 
 while getopts ":f:" opt; do
     case $opt in
@@ -166,30 +190,5 @@ while getopts ":f:" opt; do
         ;;
     esac
 done
-
-entrypoint() {
-    local input="$1"
-
-    if [[ CONVERT_240 = true ]]; then
-        convert-240p "$input"
-    fi
-
-    if [[ CONVERT_360 = true ]]; then
-        convert-360p "$input"
-    fi
-
-    if [[ CONVERT_480 = true ]]; then
-        convert-480p "$input"
-    fi
-
-    if [[ CONVERT_720 = true ]]; then
-        convert-720p "$input"
-    fi
-
-    if [[ CONVERT_1080 = true ]]; then
-        convert-1080p "$input"
-    fi
-
-}
 
 entrypoint "$@"

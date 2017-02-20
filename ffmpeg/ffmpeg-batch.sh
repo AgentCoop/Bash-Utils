@@ -34,6 +34,7 @@ get_video_res_y() {
 convert-240p() {
     local input="$1"
     local output="./videos/240p/${input}_240.mp4"
+    local ratio=$(get_aspect_ratio "$input")
 
     if is_corrupted "$output"; then
         rm -f "$output"
@@ -45,13 +46,20 @@ convert-240p() {
 
     [[ ! -d ./videos/240p ]] && mkdir -p ./videos/240p
 
-    /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 -vf scale=426:240 "$output"
+    if [[ $ratio != 16:9 ]]; then
+        local filter="-vf ${PADDING_FILTER}426:240"
+    else
+        local filter="-vf scale=426:240"
+    fi
+
+    /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 $filter "$output"    
 }
 
 convert-360p() {
     local input="$1"
     local output="./videos/360p/${input}_360.mp4"
-
+    local ratio=$(get_aspect_ratio "$input")
+    
     if is_corrupted "$output"; then
         rm -f "$output"
     fi
@@ -61,59 +69,63 @@ convert-360p() {
     fi
 
     [[ ! -d ./videos/360p ]] && mkdir -p ./videos/360p
-    /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 -vf scale=640:360 "$output"
+
+    if [[ $ratio != 16:9 ]]; then
+        local filter="-vf ${PADDING_FILTER}640:360"
+    else
+        local filter="-vf scale=640:360"
+    fi
+
+    /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 $filter "$output"    
 }
 
 convert-480p() {
     local input="$1"
     local output="./videos/480p/${input}_480.mp4"
-
+    local resy=$(get_video_res_y "$input")
+    local ratio=$(get_aspect_ratio "$input")
+    
     if is_corrupted "$output"; then
         rm -f "$output"
     fi
 
-    if [[ -f $output ]]; then
+    if [[ -f $output ]] || [[ $resy -lt 480 ]]; then
         return
     fi
 
     [[ ! -d ./videos/480p ]] && mkdir -p ./videos/480p
-    resy=$(get_video_res_y "$input")
 
-    if [[ $resy -gt 360 ]] && [[ ! $resy -eq 480 ]]; then
-            /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 -vf scale=854:480 "$output"
-    elif [[ $resy -eq 480 ]]; then
-        local ratio=$(get_aspect_ratio "$input")
-
-        if [[ $ratio == 4:3 ]]; then
-            local filter="-vf ${PADDING_FILTER}854:480"
-        else
-            local filter=
-        fi
-
-        /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 $filter "$output"
+    if [[ $ratio != 16:9 ]]; then
+        local filter="-vf ${PADDING_FILTER}854:480"
+    else
+        local filter="-vf scale=854:480"
     fi
+
+    /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 $filter "$output"  
 }
 
 convert-720p() {
     local input="$1"
     local output="./videos/720p/${input}_720.mp4"
-    
-    resy=$(get_video_res_y "$input")
-    [[ ! -d ./videos/720p ]] && mkdir -p ./videos/720p
+    local resy=$(get_video_res_y "$input")
 
     if is_corrupted "$output"; then
         rm -f "$output"
     fi
 
-    if [[ -f $output ]]; then
+    if [[ -f $output ]] || [[ $resy -lt 720 ]]; then
         return
     fi
 
-    if [[ $resy -gt 480 ]] && [[ ! $resy -eq 720 ]]; then
-    /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 -vf scale=1280:720 "$output"
-    elif [[ $resy -eq 720 ]]; then
-        /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 -crf 28 "$output"
+    [[ ! -d ./videos/720p ]] && mkdir -p ./videos/720p
+
+    if [[ $ratio != 16:9 ]]; then
+        local filter="-vf ${PADDING_FILTER}1280:720"
+    else
+        local filter="-vf scale=1280:720"
     fi
+
+    /usr/bin/ffmpeg -i "$input" -sn -movflags faststart -strict -2 $filter "$output" 
 }
 
 convert-1080p() {

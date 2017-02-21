@@ -28,7 +28,7 @@ is_corrupted() {
 input_to_ouptut() {
     local output=$(echo basename "$INPUT" | awk "match(\$0, \"$INPUT_REGEXP\", m) {printf \"$OUTPUT_SPEC\", m[1],m[2],m[3],m[4],m[5],m[6]}" \
         | sed "s/\s/_/g" \
-        | sed "s/['\"]//g" \
+        | sed "s/['\",]//g" \
         | sed 's/\]//g' \
         | sed 's/\[//g' \
         | sed 's/&/_and_/g')
@@ -73,7 +73,9 @@ convert-240p() {
     fi
 
     if [[ $DRY_RUN = true ]]; then
-        echo "INPUT: $INPUT, OUTPUT: $output"
+        echo "INPUT: $INPUT"
+        echo "OUTPUT: $output"
+        echo
     else
         /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"    
     fi
@@ -99,9 +101,11 @@ convert-360p() {
     fi
 
     if [[ $DRY_RUN = true ]]; then
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output" 
+        echo "INPUT: $INPUT"
+        echo "OUTPUT: $output"
+        echo         
     else
-        echo "INPUT: $INPUT, OUTPUT: $output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
     fi
 }
 
@@ -125,9 +129,11 @@ convert-480p() {
     fi
 
     if [[ $DRY_RUN = true ]]; then
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output" 
+        echo "INPUT: $INPUT"
+        echo "OUTPUT: $output"
+        echo         
     else
-        echo "INPUT: $INPUT, OUTPUT: $output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"         
     fi 
 }
 
@@ -151,9 +157,11 @@ convert-720p() {
     fi
 
     if [[ $DRY_RUN = true ]]; then
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
+        echo "INPUT: $INPUT"
+        echo "OUTPUT: $output"
+        echo            
     else
-        echo "INPUT: $INPUT, OUTPUT: $output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
     fi 
 }
 
@@ -177,9 +185,11 @@ convert-1080p() {
     fi
 
     if [[ $DRY_RUN = true ]]; then
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
+        echo "INPUT: $INPUT"
+        echo "OUTPUT: $output"
+        echo          
     else
-        echo "INPUT: $INPUT, OUTPUT: $output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
     fi     
 }
 
@@ -269,4 +279,6 @@ while [ $# -ge 1 ]; do
         shift
 done
 
-entrypoint "$*"
+echo $DRY_RUN
+
+#entrypoint "$*"

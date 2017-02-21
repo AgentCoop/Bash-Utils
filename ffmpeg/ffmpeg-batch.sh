@@ -1,6 +1,6 @@
 #! /bin/bash
 
-set -ex
+set -e
 
 PADDING_FILTER="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2,scale="
 INPUT=
@@ -30,6 +30,7 @@ input_to_ouptut() {
         | sed "s/\s/_/g" \
         | sed "s/['\",]//g" \
         | sed 's/\]//g' \
+        | sed 's/-_-/_/g' \
         | sed 's/\[//g' \
         | sed 's/&/_and_/g')
 
@@ -194,9 +195,9 @@ convert-1080p() {
 }
 
 entrypoint() {
-    INPUT_ASPECT_RATIO="$(get_aspect_ratio $INPUT)"
-    INPUT_RES_Y="$(get_video_res_y $INPUT)"
-    OUTPUT_PREFIX="$(input_to_ouptut)"
+    INPUT_ASPECT_RATIO=$(get_aspect_ratio "$INPUT")
+    INPUT_RES_Y=$(get_video_res_y "$INPUT")
+    OUTPUT_PREFIX=$(input_to_ouptut)
 
     if [[ $CONVERT_240 = true ]]; then
         convert-240p 
@@ -221,8 +222,6 @@ entrypoint() {
 }
 
 args=$(getopt --long format:,input:,input-regexp:,output-spec:,dry-run,no-crf -o "f:i:r:o:n:h" -- "$@")
-
-#eval set -- "$args"
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -279,6 +278,4 @@ while [ $# -ge 1 ]; do
         shift
 done
 
-echo $DRY_RUN
-
-#entrypoint "$*"
+entrypoint "$*"

@@ -11,7 +11,7 @@ OUTPUT_CRF="-crf 28"
 OUTPUT_SPEC=
 DRY_RUN=
 
-PROCESSED_COUNT=0
+PROCESSED_COUNT=
 
 is_corrupted() {
     local input="$1"
@@ -201,6 +201,13 @@ entrypoint() {
     INPUT_RES_Y=$(get_video_res_y "$INPUT")
     OUTPUT_PREFIX=$(input_to_ouptut)
 
+    if [[  -f batch.stats ]]; then
+        PROCESSED_COUNT=$(cat batch.stats | cut -d "\t" -f1)
+    else
+        PROCESSED_COUNT=0
+    fi 
+
+
     if [[ $CONVERT_240 = true ]]; then
         convert-240p
         PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
@@ -226,9 +233,7 @@ entrypoint() {
         PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
     fi
 
-    echo
-    echo "Videos processed $PROCESSED_COUNT"
-    echo
+    echo "$PROCESSED_COUNT" > batch.stats
 }
 
 args=$(getopt --long format:,input:,input-regexp:,output-spec:,dry-run,no-crf -o "f:i:r:o:n:h" -- "$@")

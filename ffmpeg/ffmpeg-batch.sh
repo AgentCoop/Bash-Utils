@@ -11,6 +11,8 @@ OUTPUT_CRF="-crf 28"
 OUTPUT_SPEC=
 DRY_RUN=
 
+PROCESSED_COUNT=0
+
 is_corrupted() {
     local input="$1"
     
@@ -78,7 +80,7 @@ convert-240p() {
         echo "OUTPUT: $output"
         echo
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"    
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"  
     fi
 }
 
@@ -135,7 +137,7 @@ convert-480p() {
         echo         
     else
         /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"         
-    fi 
+    fi
 }
 
 convert-720p() {
@@ -163,7 +165,7 @@ convert-720p() {
         echo            
     else
         /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
-    fi 
+    fi
 }
 
 convert-1080p() {
@@ -191,7 +193,7 @@ convert-1080p() {
         echo          
     else
         /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
-    fi     
+    fi
 }
 
 entrypoint() {
@@ -200,25 +202,33 @@ entrypoint() {
     OUTPUT_PREFIX=$(input_to_ouptut)
 
     if [[ $CONVERT_240 = true ]]; then
-        convert-240p 
+        convert-240p
+        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
     fi
 
     if [[ $CONVERT_360 = true ]]; then
         convert-360p
+        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
     fi
 
     if [[ $CONVERT_480 = true ]]; then
         convert-480p
+        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
     fi
 
     if [[ $CONVERT_720 = true ]]; then
         convert-720p
+        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
     fi
 
     if [[ $CONVERT_1080 = true ]]; then
         convert-1080p
+        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
     fi
 
+    echo
+    echo "Videos processed $PROCESSED_COUNT"
+    echo
 }
 
 args=$(getopt --long format:,input:,input-regexp:,output-spec:,dry-run,no-crf -o "f:i:r:o:n:h" -- "$@")

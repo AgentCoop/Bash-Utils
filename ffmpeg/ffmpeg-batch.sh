@@ -36,6 +36,8 @@ input_to_ouptut() {
     if [[ -z $output ]]; then
         exit -1
     fi
+
+    echo $output
 }
 
 get_aspect_ratio() {

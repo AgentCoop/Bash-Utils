@@ -7,7 +7,6 @@ INPUT=
 INPUT_RES_Y=
 INPUT_REGEXP=
 INPUT_ASPECT_RATIO=
-OUTPUT_CRF="-crf 28"
 OUTPUT_SPEC=
 DRY_RUN=
 
@@ -32,7 +31,7 @@ input_to_ouptut() {
         | sed "s/\s/_/g" \
         | sed "s/['\",]//g" \
         | sed 's/\]//g' \
-        | sed 's/-_-/_/g' \
+        | sed 's/_-_/_/g' \
         | sed 's/\[//g' \
         | sed 's/&/_and_/g')
 
@@ -80,7 +79,7 @@ convert-240p() {
         echo "OUTPUT: $output"
         echo
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"  
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 -crf 28 $filter "$output"
     fi
 }
 
@@ -108,7 +107,7 @@ convert-360p() {
         echo "OUTPUT: $output"
         echo         
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 -crf 28 $filter "$output"
     fi
 }
 
@@ -136,7 +135,7 @@ convert-480p() {
         echo "OUTPUT: $output"
         echo         
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"         
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 -crf 28 $filter "$output"
     fi
 }
 
@@ -164,7 +163,7 @@ convert-720p() {
         echo "OUTPUT: $output"
         echo            
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 -crf 28 $filter "$output"
     fi
 }
 
@@ -175,24 +174,18 @@ convert-1080p() {
         rm -f "$output"
     fi
 
-    if [[ -f $output ]]; then
+    if [[ -f $output ]] || [[ $INPUT_RES_Y -lt 800 ]]; then
         return
     fi
 
     [[ ! -d ./videos/1080p ]] && mkdir -p ./videos/1080p
-
-    if [[ $resy -gt 720 ]] && [[ ! $resy -eq 1080 ]]; then
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 -crf 28 -vf scale=1920:1080 "$output"
-    elif [[ $resy -eq 1080 ]]; then
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 -crf 28 "$output"
-    fi
 
     if [[ $DRY_RUN = true ]]; then
         echo "INPUT: $INPUT"
         echo "OUTPUT: $output"
         echo          
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 $OUTPUT_CRF $filter "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -movflags faststart -strict -2 -crf 28 -vf scale=1920:1080 "$output"
     fi
 }
 
@@ -202,7 +195,7 @@ entrypoint() {
     OUTPUT_PREFIX=$(input_to_ouptut)
 
     if [[  -f batch.stats ]]; then
-        PROCESSED_COUNT=$(cat batch.stats | cut -d "\t" -f1)
+        PROCESSED_COUNT=$(cat batch.stats | cut -f 1)
     else
         PROCESSED_COUNT=0
     fi 
@@ -236,7 +229,7 @@ entrypoint() {
     echo "$PROCESSED_COUNT" > batch.stats
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,dry-run,no-crf -o "f:i:r:o:n:h" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,dry-run -o "f:i:r:o:n:h" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -247,9 +240,6 @@ while [ $# -ge 1 ]; do
                    ;;
                 -i|--input)
                     INPUT="$2"
-                ;;
-                --no-crf)
-                    OUTPUT_CRF=
                 ;;
                 -n|--dry-run)
                     DRY_RUN=true

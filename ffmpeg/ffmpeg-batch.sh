@@ -96,7 +96,7 @@ convert-360p() {
 
     [[ ! -d ./videos/360p ]] && mkdir -p ./videos/360p
 
-    if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
+    if [[ $INPUT_ASPECT_RATIO!= 16:9 ]]; then
         local filter="-vf ${PADDING_FILTER}640:360"
     else
         local filter="-vf scale=640:360"
@@ -124,7 +124,7 @@ convert-480p() {
 
     [[ ! -d ./videos/480p ]] && mkdir -p ./videos/480p
 
-    if [[ $ratio != 16:9 ]]; then
+    if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
         local filter="-vf ${PADDING_FILTER}854:480"
     else
         local filter="-vf scale=854:480"
@@ -152,7 +152,7 @@ convert-720p() {
 
     [[ ! -d ./videos/720p ]] && mkdir -p ./videos/720p
 
-    if [[ $ratio != 16:9 ]]; then
+    if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
         local filter="-vf ${PADDING_FILTER}1280:720"
     else
         local filter="-vf scale=1280:720"

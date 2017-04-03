@@ -96,7 +96,7 @@ convert-360p() {
 
     [[ ! -d ./videos/360p ]] && mkdir -p ./videos/360p
 
-    if [[ $INPUT_ASPECT_RATIO!= 16:9 ]]; then
+    if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
         local filter="-vf ${PADDING_FILTER}640:360"
     else
         local filter="-vf scale=640:360"

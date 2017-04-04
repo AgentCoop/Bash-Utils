@@ -29,7 +29,7 @@ is_corrupted() {
 input_to_ouptut() {
     local output=$(echo basename "$INPUT" | awk "match(\$0, \"$INPUT_REGEXP\", m) {printf \"$OUTPUT_SPEC\", m[1],m[2],m[3],m[4],m[5],m[6]}" \
         | sed "s/\s/_/g" \
-        | sed "s/['\",]//g" \
+        | sed "s/['\",\(\)]//g" \
         | sed 's/\]//g' \
         | sed 's/_-_/_/g' \
         | sed 's/\[//g' \

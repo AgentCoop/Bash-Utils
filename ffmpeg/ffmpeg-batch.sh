@@ -156,11 +156,11 @@ entrypoint() {
     INPUT_AUDIOFORMAT=$(get_audio_format "$INPUT")
     INPUT_AUDIOBITRATE=$(get_audio_bitrate "$INPUT")
 
-    if [[ $INTPUT_AUDIOFORMAT != 'aac' ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
-        err Failed to determine input audio bitrate
+    if [[ $INPUT_AUDIOFORMAT != "aac" ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
+        err "Failed to determine input audio bitrate"
     fi
 
-    if [[ $INTPUT_AUDIOFORMAT != 'aac' ]] && [[ $INPUT_AUDIOBITRATE -lt $AUDIO_BITRATE ]]; then
+    if [[ $INPUT_AUDIOFORMAT != "aac" ]] && [[ $INPUT_AUDIOBITRATE -lt $AUDIO_BITRATE ]]; then
         err "Input audio bitrate ${INPUT_AUDIOBITRATE}k must be greater than specified output ${AUDIO_BITRATE}k"
     fi
 

@@ -15,7 +15,6 @@ DRY_RUN=
 VIDEO_STREAM=0:0
 AUDIO_STREAM=0:1
 VIDEO_CODEC=libx264 # or copy
-AUDIO_CODEC=aac # or copy
 AUDIO_BITRATE=192
 
 PROCESSED_COUNT=
@@ -123,14 +122,20 @@ transcode() {
         ;; 
     esac
 
+    if [[ $INPUT_AUDIOFORMAT == 'aac' ]] && [[ -z $AUDIO_BITRATE ]]; then
+        local audio_ops='-c:a copy'
+    elif
+        local audio_ops="-c:a aac -b:a ${AUDIO_BITRATE}k"
+    fi
+
     if [[ $DRY_RUN = true ]]; then
         echo "INPUT: $INPUT"
         echo "OUTPUT: $output"
         echo
     elif [[ $MAKE_SAMPLE = true ]]; then
-        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v $VIDEO_CODEC -c:a $AUDIO_CODEC -b:a "$AUDIO_BITRATE"k -ac 2 -movflags faststart -strict -2 -crf 28 $scaling "sample_${yres}.mp4"
+        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v $VIDEO_CODEC $audio_ops -ac 2 -movflags faststart -strict -2 -crf 28 $scaling "sample_${yres}.mp4"
     else
-        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v $VIDEO_CODEC -c:a $AUDIO_CODEC -b:a "$AUDIO_BITRATE"k -ac 2 -movflags faststart -strict -2 -crf 28 $scaling "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v $VIDEO_CODEC -c:a $audio_ops -ac 2 -movflags faststart -strict -2 -crf 28 $scaling "$output"
     fi    
 }
 
@@ -185,7 +190,7 @@ entrypoint() {
     echo "$PROCESSED_COUNT" > batch.stats
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,dry-run,make-sample,vc,ac,vs,ab -o "f:i:r:o:A:V:Bn:h" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,dry-run,make-sample,vc,vs,ab -o "f:i:r:o:A:V:Bn:h" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -205,9 +210,6 @@ while [ $# -ge 1 ]; do
                 ;;
                 -V|--video-stream)
                     VIDEO_STREAM="$2"
-                ;;
-                --ac)
-                    AUDIO_CODEC="$2"
                 ;;
                 -A|--audio-stream)
                     AUDIO_STREAM="$2"

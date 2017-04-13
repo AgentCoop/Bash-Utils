@@ -20,6 +20,11 @@ AUDIO_BITRATE=192
 PROCESSED_COUNT=
 BATCH_MODE=no
 
+err() {
+    (>&2 echo "$1")
+    exit -1
+}
+
 is_corrupted() {
     local input="$1"
     
@@ -122,7 +127,7 @@ transcode() {
         ;; 
     esac
 
-    if [[ $INPUT_AUDIOFORMAT == 'aac' ]] && [[ -z $AUDIO_BITRATE ]]; then
+    if [[ $INPUT_AUDIOFORMAT == 'aac' ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
         local audio_ops='-c:a copy'
     else
         local audio_ops="-c:a aac -b:a ${AUDIO_BITRATE}k"
@@ -151,9 +156,12 @@ entrypoint() {
     INPUT_AUDIOFORMAT=$(get_audio_format "$INPUT")
     INPUT_AUDIOBITRATE=$(get_audio_bitrate "$INPUT")
 
-    if [[ ! -z $AUDIO_BITRATE ]] && [[ $INPUT_AUDIOBITRATE -lt $AUDIO_BITRATE ]]; then
-        echo "Input audio bitrate ${INPUT_AUDIOBITRATE}k must be greater than specified output ${AUDIO_BITRATE}k"
-        exit
+    if [[ $INTPUT_AUDIOFORMAT != 'aac' ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
+        err Failed to determine input audio bitrate
+    fi
+
+    if [[ $INTPUT_AUDIOFORMAT != 'aac' ]] && [[ $INPUT_AUDIOBITRATE -lt $AUDIO_BITRATE ]]; then
+        err "Input audio bitrate ${INPUT_AUDIOBITRATE}k must be greater than specified output ${AUDIO_BITRATE}k"
     fi
 
     if [[  -f batch.stats ]]; then

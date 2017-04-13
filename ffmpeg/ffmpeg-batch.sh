@@ -151,7 +151,7 @@ entrypoint() {
     INPUT_AUDIOFORMAT=$(get_audio_format "$INPUT")
     INPUT_AUDIOBITRATE=$(get_audio_bitrate "$INPUT")
 
-    if [[ $INPUT_AUDIOBITRATE -lt $AUDIO_BITRATE ]]; then
+    if [[ ! -z $AUDIO_BITRATE ]] && [[ $INPUT_AUDIOBITRATE -lt $AUDIO_BITRATE ]]; then
         echo "Input audio bitrate ${INPUT_AUDIOBITRATE}k must be greater than specified output ${AUDIO_BITRATE}k"
         exit
     fi

@@ -124,7 +124,7 @@ transcode() {
 
     if [[ $INPUT_AUDIOFORMAT == 'aac' ]] && [[ -z $AUDIO_BITRATE ]]; then
         local audio_ops='-c:a copy'
-    elif
+    else
         local audio_ops="-c:a aac -b:a ${AUDIO_BITRATE}k"
     fi
 

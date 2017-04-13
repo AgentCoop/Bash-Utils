@@ -136,7 +136,8 @@ transcode() {
     if [[ $DRY_RUN = true ]]; then
         echo "INPUT: $INPUT"
         echo "OUTPUT: $output"
-        echo
+        echo "Audio options: $audio_ops"
+        echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
         /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v $VIDEO_CODEC $audio_ops -ac 2 -movflags faststart -strict -2 -crf 28 $scaling "sample_${yres}.mp4"
     else

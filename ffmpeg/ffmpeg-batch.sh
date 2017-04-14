@@ -2,6 +2,9 @@
 
 set -e
 
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 PADDING_FILTER="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2,scale="
 INPUT=
 INPUT_RES_Y=
@@ -14,13 +17,13 @@ DRY_RUN=
 
 VIDEO_STREAM=0:0
 AUDIO_STREAM=0:1
-AUDIO_BITRATE=192
 
 PROCESSED_COUNT=
 BATCH_MODE=no
 
 err() {
-    (>&2 echo "$1")
+    (>&2 echo -e "${RED}${1}${NC}")
+    echo
     exit -1
 }
 
@@ -80,6 +83,11 @@ get_video_res_y() {
 
 transcode() {
     local yres="$1"
+    local abitrate="$2"
+
+    if [[ $abirate -lt $INPUT_AUDIOBITRATE ]]; then
+        abirate=$INPUT_AUDIOBITRATE
+    fi
 
     if [[ $BATCH_MODE == "no" ]]; then
         local output="${OUTPUT_PREFIX}_${yres}.mp4"
@@ -129,7 +137,7 @@ transcode() {
     if [[ $INPUT_AUDIOFORMAT == 'aac' ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
         local audio_ops='-c:a copy'
     else
-        local audio_ops="-c:a aac -b:a ${AUDIO_BITRATE}k -ac 2"
+        local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
     fi
 
     if [[ $DRY_RUN = true ]]; then
@@ -160,45 +168,28 @@ entrypoint() {
         err "Failed to determine input audio bitrate"
     fi
 
-    if [[ "$INPUT_AUDIOFORMAT" != "aac" ]] && [[ $INPUT_AUDIOBITRATE -lt $AUDIO_BITRATE ]]; then
-        err "Input audio bitrate ${INPUT_AUDIOBITRATE}k must be greater than specified output ${AUDIO_BITRATE}k"
-    fi
-
-    if [[  -f batch.stats ]]; then
-        PROCESSED_COUNT=$(cat batch.stats | cut -f 1)
-    else
-        PROCESSED_COUNT=0
-    fi
-
     if [[ $CONVERT_240 = true ]]; then
-        transcode 240
-        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+        transcode 240 64
     fi
 
     if [[ $CONVERT_360 = true ]]; then
-        transcode 360
-        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+        transcode 360 128
     fi
 
     if [[ $CONVERT_480 = true ]]; then
-        transcode 480
-        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+        transcode 480 128
     fi
 
     if [[ $CONVERT_720 = true ]]; then
-        transcode 720
-        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+        transcode 720 192
     fi
 
     if [[ $CONVERT_1080 = true ]]; then
-        transcode 1080
-        PROCESSED_COUNT=$((PROCESSED_COUNT + 1))
+        transcode 1080 192
     fi
-
-    echo "$PROCESSED_COUNT" > batch.stats
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,audio-bitrate:,dry-run,make-sample -o "f:i:r:o:A:V:Bh" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,dry-run,make-sample -o "f:i:r:o:A:V:Bh" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -221,9 +212,6 @@ while [ $# -ge 1 ]; do
                 ;;
                 -A|--audio-stream)
                     AUDIO_STREAM="$2"
-                ;;
-                --audio-bitrate)
-                    AUDIO_BITRATE="$2"
                 ;;
                 --make-sample)
                     MAKE_SAMPLE=true

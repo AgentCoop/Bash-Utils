@@ -110,9 +110,9 @@ transcode() {
         ;;
         360)
             if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
-                local filter="-vf ${PADDING_FILTER}640:360"
+                local scaling="-vf ${PADDING_FILTER}640:360"
             else
-                local filter="-vf scale=640:360"
+                local scaling="-vf scale=640:360"
             fi
         ;;
         480)

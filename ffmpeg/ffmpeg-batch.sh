@@ -146,9 +146,9 @@ transcode() {
         echo "Audio options: $audio_ops"
         echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
-        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -movflags faststart -strict -2 -crf 28 $scaling "sample_${yres}.mp4"
+        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $scaling "sample_${yres}.mp4"
     else
-        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -movflags faststart -strict -2 -crf 28 $scaling "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $scaling "$output"
     fi    
 }
 

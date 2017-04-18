@@ -85,10 +85,6 @@ transcode() {
     local yres="$1"
     local abitrate="$2"
 
-    if [[ $abirate -lt $INPUT_AUDIOBITRATE ]]; then
-        abirate=$INPUT_AUDIOBITRATE
-    fi
-
     if [[ $BATCH_MODE == "no" ]]; then
         local output="${OUTPUT_PREFIX}_${yres}.mp4"
     else
@@ -134,11 +130,7 @@ transcode() {
         ;; 
     esac
 
-    if [[ $INPUT_AUDIOFORMAT == 'aac' ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
-        local audio_ops='-c:a copy'
-    else
-        local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
-    fi
+    local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
 
     if [[ $DRY_RUN = true ]]; then
         echo "INPUT: $INPUT"

@@ -5,7 +5,7 @@ set -e
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-PADDING_FILTER="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2,scale="
+PADDING_FILTER="pad=ih*16/9:ih:(ow-iw)/2:(oh-ih)/2"
 INPUT=
 INPUT_RES_Y=
 INPUT_REGEXP=
@@ -18,7 +18,8 @@ DRY_RUN=
 VIDEO_STREAM=0:0
 AUDIO_STREAM=0:1
 
-PROCESSED_COUNT=
+VIDEO_NO_PADDING=false
+COPY_AUDIO=false
 BATCH_MODE=no
 
 err() {
@@ -96,41 +97,35 @@ transcode() {
         exit
     fi
 
+    local filter_ops="-vf "
+
+    if [[ $VIDEO_NO_PADDING = false ]] && [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
+        filter_ops="${filter_ops} ${PADDING_FILTER},"
+    fi
+
     case $yres in
         240)
-            if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
-                local scaling="-vf ${PADDING_FILTER}426:240"
-            else
-                local scaling="-vf scale=426:240"
-            fi
+            local filter_ops="${filter_ops}scale=426:240"
         ;;
         360)
-            if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
-                local scaling="-vf ${PADDING_FILTER}640:360"
-            else
-                local scaling="-vf scale=640:360"
-            fi
+            local filter_ops="${filter_ops}scale=640:360"
         ;;
         480)
-            if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
-                local scaling="-vf ${PADDING_FILTER}854:480"
-            else
-                local scaling="-vf scale=854:480"
-            fi
+            local filter_ops="${filter_ops}scale=854:480"
         ;;
         720)
-            if [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
-                local scaling="-vf ${PADDING_FILTER}1280:720"
-            else
-                local scaling="-vf scale=1280:720"
-            fi
+            local filter_ops="${filter_ops}scale=1280:720"
         ;;
         1080)
-            local scaling="-vf scale=1920:1080"
+            local filter_ops="${filter_ops}scale=1920:1080"
         ;; 
     esac
 
-    local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
+    if [[ $COPY_AUDIO = true ]]; then
+        local audio_ops="-c:a copy"
+    else
+        local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
+    fi
 
     if [[ $DRY_RUN = true ]]; then
         echo "INPUT: $INPUT"
@@ -138,9 +133,9 @@ transcode() {
         echo "Audio options: $audio_ops"
         echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
-        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $scaling "sample_${yres}.mp4"
+        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $filter_ops "sample_${yres}.mp4"
     else
-        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $scaling "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $filter_ops "$output"
     fi    
 }
 
@@ -181,7 +176,7 @@ entrypoint() {
     fi
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,dry-run,make-sample -o "f:i:r:o:A:V:Bh" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,make-sample -o "f:i:r:o:A:V:Bh" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -199,11 +194,17 @@ while [ $# -ge 1 ]; do
                 --vc)
                     VIDEO_CODEC="$2"
                 ;;
+                --copy-audio)
+                    COPY_AUDIO=true
+                ;;
                 -V|--video-stream)
                     VIDEO_STREAM="$2"
                 ;;
                 -A|--audio-stream)
                     AUDIO_STREAM="$2"
+                ;;
+                --video-no-padding)
+                    VIDEO_NO_PADDING=true
                 ;;
                 --make-sample)
                     MAKE_SAMPLE=true

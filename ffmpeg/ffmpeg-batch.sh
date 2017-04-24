@@ -121,15 +121,18 @@ transcode() {
         ;; 
     esac
 
-    if [[ $COPY_AUDIO = true ]]; then
+    if [[ $COPY_AUDIO = true ]] || ; then
         local audio_ops="-c:a copy"
     else
-
         if [[ ! -z $INPUT_AUDIOBITRATE ]] && [[ $abitrate -gt $INPUT_AUDIOBITRATE ]]; then
-            abitrate=$INPUT_AUDIOBITRATE
+            if [[ $INPUT_AUDIOFORMAT == 'aac' ]]; then
+                local audio_ops="-c:a copy"
+            else
+                local audio_ops="-c:a aac -b:a ${INPUT_AUDIOBITRATE}k -ac 2"
+            fi
+        else
+            local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
         fi
-
-        local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
     fi
 
     if [[ $DRY_RUN = true ]]; then

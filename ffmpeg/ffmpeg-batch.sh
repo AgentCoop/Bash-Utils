@@ -121,7 +121,7 @@ transcode() {
         ;; 
     esac
 
-    if [[ $COPY_AUDIO = true ]] || ; then
+    if [[ $COPY_AUDIO = true ]]; then
         local audio_ops="-c:a copy"
     else
         if [[ ! -z $INPUT_AUDIOBITRATE ]] && [[ $abitrate -gt $INPUT_AUDIOBITRATE ]]; then

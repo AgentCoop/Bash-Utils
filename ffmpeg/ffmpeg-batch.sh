@@ -94,7 +94,7 @@ transcode() {
     fi
 
     if [ -f "$output" ]; then
-        exit
+        return
     fi
 
     local filter_ops="-vf "
@@ -124,6 +124,11 @@ transcode() {
     if [[ $COPY_AUDIO = true ]]; then
         local audio_ops="-c:a copy"
     else
+
+        if [[ ! -z $INPUT_AUDIOBITRATE ]] && [[ $abitrate -lt $INPUT_AUDIOBITRATE ]]; then
+            abitrate=$INPUT_AUDIOBITRATE
+        fi
+
         local audio_ops="-c:a aac -b:a ${abitrate}k -ac 2"
     fi
 

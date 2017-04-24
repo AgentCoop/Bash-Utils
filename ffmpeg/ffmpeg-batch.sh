@@ -125,7 +125,7 @@ transcode() {
         local audio_ops="-c:a copy"
     else
 
-        if [[ ! -z $INPUT_AUDIOBITRATE ]] && [[ $abitrate -lt $INPUT_AUDIOBITRATE ]]; then
+        if [[ ! -z $INPUT_AUDIOBITRATE ]] && [[ $abitrate -gt $INPUT_AUDIOBITRATE ]]; then
             abitrate=$INPUT_AUDIOBITRATE
         fi
 

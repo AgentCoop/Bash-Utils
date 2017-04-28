@@ -87,9 +87,9 @@ transcode() {
     local abitrate="$2"
 
     if [[ $BATCH_MODE == "no" ]]; then
-        local output="${OUTPUT_PREFIX}_${yres}.mp4"
+        local output="${OUTPUT_PREFIX}_${yres}p.mp4"
     else
-        local output="./videos/${yres}p/${OUTPUT_PREFIX}_${yres}.mp4"
+        local output="./videos/${yres}p/${OUTPUT_PREFIX}_${yres}p.mp4"
         [[ ! -d "./videos/${yres}p" ]] && mkdir -p "./videos/${yres}p"
     fi
 

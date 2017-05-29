@@ -124,7 +124,9 @@ transcode() {
         ;;
         1080)
             if [[ ! $yres -eq 1080 ]]; then
-                local filter_ops="${filter_ops}scale=1920:1080"
+                local filter_ops="-vf scale=1920:1080"
+            else
+                local filter_ops=""
             fi
         ;;
     esac

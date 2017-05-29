@@ -14,6 +14,7 @@ INPUT_AUDIOFORMAT=
 INPUT_AUDIOBITRATE=
 OUTPUT_SPEC=
 DRY_RUN=
+CRF=28
 
 VIDEO_STREAM=0:0
 AUDIO_STREAM=0:1
@@ -102,6 +103,7 @@ transcode() {
     fi
 
     local filter_ops="-vf "
+    local crf_ops="-crf $CRF"
 
     if [[ $VIDEO_NO_PADDING = false ]] && [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
         filter_ops="${filter_ops} ${PADDING_FILTER},"
@@ -147,9 +149,9 @@ transcode() {
         echo "Audio options: $audio_ops"
         echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
-        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $filter_ops "sample_${yres}.mp4"
+        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 $crf_ops $filter_ops "sample_${yres}.mp4"
     else
-        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 -crf 28 $filter_ops "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 $audio_ops -sn -movflags faststart -strict -2 $crf_ops $filter_ops "$output"
     fi    
 }
 
@@ -190,7 +192,7 @@ entrypoint() {
     fi
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,make-sample -o "f:i:r:o:A:V:Bh" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,make-sample,crf -o "f:i:r:o:A:V:Bh" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -207,6 +209,9 @@ while [ $# -ge 1 ]; do
                 ;;                
                 --vc)
                     VIDEO_CODEC="$2"
+                ;;
+                --crf)
+                    CRF="$2"
                 ;;
                 --copy-audio)
                     COPY_AUDIO=true

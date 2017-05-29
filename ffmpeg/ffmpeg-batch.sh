@@ -94,7 +94,11 @@ transcode() {
     fi
 
     if [ -f "$output" ]; then
-        return
+        if [ ! -s "$output" ]; then # remove zero bytes files
+            rm -f "$output"
+        else
+            return
+        fi
     fi
 
     local filter_ops="-vf "
@@ -117,8 +121,10 @@ transcode() {
             local filter_ops="${filter_ops}scale=1280:720"
         ;;
         1080)
-            local filter_ops="${filter_ops}scale=1920:1080"
-        ;; 
+            if [[ ! $yres -eq 1080 ]]; then
+                local filter_ops="${filter_ops}scale=1920:1080"
+            fi
+        ;;
     esac
 
     if [[ $COPY_AUDIO = true ]]; then

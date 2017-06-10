@@ -123,10 +123,10 @@ transcode() {
             local filter_ops="${filter_ops}scale=1280:720"
         ;;
         1080)
-            if [[ ! $yres -eq 1080 ]]; then
-                local filter_ops="-vf scale=1920:1080"
+            if [[ ! $INPUT_RES_Y -eq 1080 ]]; then
+                filter_ops="-vf scale=1920:1080"
             else
-                local filter_ops=""
+                filter_ops=""
             fi
         ;;
     esac
@@ -194,7 +194,7 @@ entrypoint() {
     fi
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,make-sample,crf -o "f:i:r:o:A:V:Bh" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,make-sample,crf: -o "f:i:r:o:A:V:Bh" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in

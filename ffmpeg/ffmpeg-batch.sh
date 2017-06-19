@@ -120,7 +120,11 @@ transcode() {
             local filter_ops="${filter_ops}scale=854:480"
         ;;
         720)
-            local filter_ops="${filter_ops}scale=1280:720"
+            if [[ ! $INPUT_RES_Y -eq 720 ]]; then
+                filter_ops="-vf scale=1280:720"
+            else
+                filter_ops=""
+            fi
         ;;
         1080)
             if [[ ! $INPUT_RES_Y -eq 1080 ]]; then

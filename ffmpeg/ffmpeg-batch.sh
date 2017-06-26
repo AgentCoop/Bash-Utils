@@ -173,7 +173,7 @@ entrypoint() {
     INPUT_AUDIOFORMAT=$(get_audio_format "$INPUT")
     INPUT_AUDIOBITRATE=$(get_audio_bitrate "$INPUT")
 
-    if [[ "$INPUT_AUDIOFORMAT" != "aac" ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
+    if [[ $COPY_AUDIO != true ]] && [[ "$INPUT_AUDIOFORMAT" != "aac" ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
         err "Failed to determine input audio bitrate"
     fi
 

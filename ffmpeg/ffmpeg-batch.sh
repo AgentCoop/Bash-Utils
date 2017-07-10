@@ -22,6 +22,7 @@ AUDIO_STREAM=0:1
 VIDEO_NO_PADDING=false
 COPY_AUDIO=false
 BATCH_MODE=no
+CONVERT_ALL=false
 
 err() {
     (>&2 echo -e "${RED}${1}${NC}")
@@ -161,7 +162,6 @@ transcode() {
     fi    
 }
 
-
 entrypoint() {
     INPUT_ASPECT_RATIO=$(get_aspect_ratio "$INPUT")
     INPUT_RES_Y=$(get_video_res_y "$INPUT")
@@ -177,23 +177,23 @@ entrypoint() {
         err "Failed to determine input audio bitrate"
     fi
 
-    if [[ $CONVERT_240 = true ]]; then
+    if [[ $CONVERT_240 = true ]] || [[ $CONVERT_ALL = true ]]; then
         transcode 240 64
     fi
 
-    if [[ $CONVERT_360 = true ]]; then
+    if [[ $CONVERT_360 = true ]] || [[ $CONVERT_ALL = true ]]; then
         transcode 360 128
     fi
 
-    if [[ $CONVERT_480 = true ]]; then
+    if [[ $CONVERT_480 = true ]] || [[ $CONVERT_ALL = true ]]; then
         transcode 480 128
     fi
 
-    if [[ $CONVERT_720 = true ]]; then
+    if [[ $CONVERT_720 = true ]] || [[ $CONVERT_ALL = true ]]; then
         transcode 720 192
     fi
 
-    if [[ $CONVERT_1080 = true ]]; then
+    if [[ $CONVERT_1080 = true ]] || [[ $CONVERT_ALL = true ]]; then
         transcode 1080 192
     fi
 }
@@ -245,6 +245,9 @@ while [ $# -ge 1 ]; do
                 ;;
                 -f|--format)
                     case $2 in
+                        all)
+                            CONVERT_ALL=true
+                        ;;
                         240)
                             CONVERT_240=true
                         ;;

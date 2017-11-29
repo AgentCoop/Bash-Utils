@@ -1,6 +1,6 @@
 #! /bin/bash
 
-set -ex
+set -e
 
 RED='\033[0;31m'
 NC='\033[0m' # No Color
@@ -15,6 +15,7 @@ INPUT_AUDIOBITRATE=
 OUTPUT_SPEC=
 DRY_RUN=
 TUNE=film
+CRF=26
 
 VIDEO_STREAM=0:0
 AUDIO_STREAM=0:1
@@ -106,6 +107,7 @@ transcode() {
     local filter_ops="-vf "
     local tune_op="-tune $TUNE"
     local extra_ops=
+    local crf_op="-crf $CRF"
 
     if [[ $VIDEO_NO_PADDING = false ]] && [[ $INPUT_ASPECT_RATIO != 16:9 ]]; then
         filter_ops="${filter_ops} ${PADDING_FILTER},"
@@ -122,7 +124,6 @@ transcode() {
             local filter_ops="${filter_ops}scale=854:480"
         ;;
         720)
-            extra_ops="-maxrate 3000k -bufsize 6000k"
             if [[ ! $INPUT_RES_Y -eq 720 ]]; then
                 filter_ops="-vf scale=1280:720"
             else
@@ -130,7 +131,6 @@ transcode() {
             fi
         ;;
         1080)
-            extra_ops="-maxrate 4000k -bufsize 8000k"
             if [[ ! $INPUT_RES_Y -eq 1080 ]]; then
                 filter_ops="-vf scale=1920:1080"
             else
@@ -159,9 +159,9 @@ transcode() {
         echo "Audio options: $audio_ops"
         echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
-        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 -preset fast $tune_op $extra_ops $audio_ops -movflags faststart -strict -2 $filter_ops "sample_${yres}.mp4"
+        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart -strict -2 $filter_ops "sample_${yres}.mp4"
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 -preset fast $tune_op $extra_ops $audio_ops -movflags faststart -strict -2 $filter_ops "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart -strict -2 $filter_ops "$output"
     fi
 }
 
@@ -201,7 +201,7 @@ entrypoint() {
     fi
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,make-sample,tune: -o "f:i:r:o:A:V:Bh" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,make-sample,tune,crf: -o "f:i:r:o:A:V:Bh" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -221,9 +221,12 @@ while [ $# -ge 1 ]; do
                 ;;
                 --tune)
                     if [[ $2 != film ]] && [[ $2 != animation ]]; then
-                        err "Invalid value for the tune option, allowed tune or animation"
+                        err "Invalid value for the tune option, allowed film or animation"
                     fi
                     TUNE="$2"
+                ;;
+                --crf)
+                    CRF="$2"
                 ;;
                 --copy-audio)
                     COPY_AUDIO=true

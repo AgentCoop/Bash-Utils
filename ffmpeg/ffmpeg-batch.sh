@@ -159,9 +159,9 @@ transcode() {
         echo "Audio options: $audio_ops"
         echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
-        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart -strict -2 $filter_ops "sample_${yres}.mp4"
+        /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart $filter_ops "sample_${yres}.mp4"
     else
-        /usr/bin/ffmpeg -i "$INPUT" -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart -strict -2 $filter_ops "$output"
+        /usr/bin/ffmpeg -i "$INPUT" -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart $filter_ops "$output"
     fi
 }
 

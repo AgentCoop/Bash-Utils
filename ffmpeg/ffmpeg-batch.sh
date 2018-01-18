@@ -197,16 +197,16 @@ entrypoint() {
     fi
     
     if [[ $AUTODETECT_STREAMS = true ]]; then
-        $AUDIO_STREAM=$(get_audio_stream "$INPUT")
-        $VIDEO_STREAM=$(get_video_stream "$INPUT")
+        AUDIO_STREAM=$(get_audio_stream "$INPUT")
+        VIDEO_STREAM=$(get_video_stream "$INPUT")
     fi
-    
+
     INPUT_AUDIOFORMAT=$(get_audio_format "$INPUT")
     INPUT_AUDIOBITRATE=$(get_audio_bitrate "$INPUT")
 
     if [[ $DRY_RUN = true ]]; then
-        echo "Auto-detected video stream: $(get_video_stream \"$INPUT\")"
-        echo "Auto-detected audio stream: $(get_audio_stream \"$INPUT\")"
+        echo "Auto-detected video stream: $(get_video_stream $INPUT)"
+        echo "Auto-detected audio stream: $(get_audio_stream $INPUT)"
         echo '-----------------------------------'
     fi
 

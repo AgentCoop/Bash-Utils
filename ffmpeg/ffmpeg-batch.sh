@@ -65,7 +65,7 @@ input_to_ouptut() {
 
 get_video_stream() {
     local input="$1"
-    local stream=$(ffprobe "$input" 2>&1 | awk "match(\$0, /Stream #([0-9]:[0-9]).*Video: h264/, m) { print m[1] }")
+    local stream=$(ffprobe "$input" 2>&1 | awk "match(\$0, /Stream #([0-9]:[0-9]).*Video: (h264|hevc)/, m) { print m[1] }")
 
     if [[ -z $stream ]]; then
         err "Failed to determine video stream"
@@ -235,7 +235,7 @@ entrypoint() {
     fi
 }
 
-args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,detect-streams,make-sample,tune,crf: -o "f:i:r:o:A:V:Bh" -- "$@")
+args=$(getopt --long format:,input:,input-regexp:,output-spec:,audio-stream:,video-stream:,video-no-padding,copy-audio,dry-run,pattern1,detect-streams,make-sample,tune,crf: -o "f:i:r:o:A:V:Bh" -- "$@")
 
 while [ $# -ge 1 ]; do
         case "$1" in
@@ -249,6 +249,10 @@ while [ $# -ge 1 ]; do
                 ;;
                 -B)
                     BATCH_MODE="yes"
+                ;;
+                pattern1)
+                    INPUT_REGEXP="(S[0-9]+E[0-9]+)"
+                    OUTPUT_SPEC="%s"
                 ;;
                 --detect-streams)
                     AUTODETECT_STREAMS=true

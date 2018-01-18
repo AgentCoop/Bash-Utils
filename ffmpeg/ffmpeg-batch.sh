@@ -21,6 +21,7 @@ VIDEO_STREAM=0:0
 AUDIO_STREAM=0:1
 
 VIDEO_NO_PADDING=false
+AUTODETECT_STREAMS=false
 COPY_AUDIO=false
 BATCH_MODE=no
 CONVERT_ALL=false
@@ -175,10 +176,17 @@ transcode() {
         fi
     fi
 
+    if [[ $AUTODETECT_STREAMS =true ]]; then
+        $AUDIO_STREAM=$(get_audio_stream "$INPUT")
+        $VIDEO_STREAM=$(get_video_stream "$INPUT")
+    fi
+
     if [[ $DRY_RUN = true ]]; then
         echo "INPUT: $INPUT"
         echo "OUTPUT: $output"
         echo "Audio options: $audio_ops"
+        echo "Auto-detected video stream": get_video_stream "$INPUT"
+        echo "Auto-detected audio stream": get_audio_stream "$INPUT"
         echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
         /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart $filter_ops "sample_${yres}.mp4"
@@ -239,8 +247,7 @@ while [ $# -ge 1 ]; do
                     BATCH_MODE="yes"
                 ;;
                 --detect-streams)
-                    VIDEO_STREAM="$(get_video_stream)"
-                    AUDIO_STREAM="$(get_audio_stream)"
+                    AUTODETECT_STREAMS=true
                 ;;                
                 --vc)
                     VIDEO_CODEC="$2"

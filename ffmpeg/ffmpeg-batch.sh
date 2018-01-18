@@ -291,8 +291,14 @@ while [ $# -ge 1 ]; do
                 ;;
                 -f|--format)
                     case $2 in
-                        all)
+                        full-hd)
                             CONVERT_ALL=true
+                        ;;
+                        hd)
+                            CONVERT_240=true
+                            CONVERT_360=true
+                            CONVERT_480=true
+                            CONVERT_720=true
                         ;;
                         240)
                             CONVERT_240=true

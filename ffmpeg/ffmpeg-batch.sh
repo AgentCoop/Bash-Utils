@@ -66,7 +66,7 @@ get_video_stream() {
     local input="$1"
     local stream=$(ffprobe "$input" 2>&1 | awk "match(\$0, /Stream #([0-9]:[0-9]).*Video: h264/, m) { print m[1] }")
 
-    if [[ ! stream ]]; then
+    if [[ ! $stream ]]; then
         err "Failed to determine video stream"
     fi
 
@@ -77,7 +77,7 @@ get_audio_stream() {
     local input="$1"
     local stream=$(ffprobe "$input" 2>&1 | awk "match(\$0, /Stream #([0-9]:[0-9]).*Audio: (ac3|aac)/, m) { print m[1] }")
 
-    if [[ ! stream ]]; then
+    if [[ ! $stream ]]; then
         err "Failed to determine audio stream"
     fi
 

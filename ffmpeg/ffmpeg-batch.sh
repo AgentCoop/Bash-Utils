@@ -67,7 +67,7 @@ get_video_stream() {
     local input="$1"
     local stream=$(ffprobe "$input" 2>&1 | awk "match(\$0, /Stream #([0-9]:[0-9]).*Video: h264/, m) { print m[1] }")
 
-    if [[ ! $stream ]]; then
+    if [[ -z $stream ]]; then
         err "Failed to determine video stream"
     fi
 
@@ -78,7 +78,7 @@ get_audio_stream() {
     local input="$1"
     local stream=$(ffprobe "$input" 2>&1 | awk "match(\$0, /Stream #([0-9]:[0-9]).*Audio: (ac3|aac)/, m) { print m[1] }")
 
-    if [[ ! $stream ]]; then
+    if [[ -z $stream ]]; then
         err "Failed to determine audio stream"
     fi
 
@@ -176,17 +176,10 @@ transcode() {
         fi
     fi
 
-    if [[ $AUTODETECT_STREAMS =true ]]; then
-        $AUDIO_STREAM=$(get_audio_stream "$INPUT")
-        $VIDEO_STREAM=$(get_video_stream "$INPUT")
-    fi
-
     if [[ $DRY_RUN = true ]]; then
         echo "INPUT: $INPUT"
         echo "OUTPUT: $output"
         echo "Audio options: $audio_ops"
-        echo "Auto-detected video stream": get_video_stream "$INPUT"
-        echo "Auto-detected audio stream": get_audio_stream "$INPUT"
         echo 
     elif [[ $MAKE_SAMPLE = true ]]; then
         /usr/bin/ffmpeg -t '00:32' -ss '00:05:00' -i "$INPUT" -y -sn -map_chapters -1 -map $VIDEO_STREAM -map $AUDIO_STREAM -c:v libx264 -profile:v high -level 4.0 $tune_op $crf_op $extra_ops $audio_ops -movflags faststart $filter_ops "sample_${yres}.mp4"
@@ -203,8 +196,19 @@ entrypoint() {
         OUTPUT_PREFIX=$(input_to_ouptut)
     fi
     
+    if [[ $AUTODETECT_STREAMS = true ]]; then
+        $AUDIO_STREAM=$(get_audio_stream "$INPUT")
+        $VIDEO_STREAM=$(get_video_stream "$INPUT")
+    fi
+    
     INPUT_AUDIOFORMAT=$(get_audio_format "$INPUT")
     INPUT_AUDIOBITRATE=$(get_audio_bitrate "$INPUT")
+
+    if [[ $DRY_RUN = true ]]; then
+        echo "Auto-detected video stream: $(get_video_stream \"$INPUT\")"
+        echo "Auto-detected audio stream: $(get_audio_stream \"$INPUT\")"
+        echo '-----------------------------------'
+    fi
 
     if [[ $COPY_AUDIO != true ]] && [[ "$INPUT_AUDIOFORMAT" != "aac" ]] && [[ -z $INPUT_AUDIOBITRATE ]]; then
         err "Failed to determine input audio bitrate"

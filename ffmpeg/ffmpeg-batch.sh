@@ -253,6 +253,7 @@ while [ $# -ge 1 ]; do
                 pattern1)
                     INPUT_REGEXP="(S[0-9]+E[0-9]+)"
                     OUTPUT_SPEC="%s"
+                    BATCH_MODE="yes"                   
                 ;;
                 --detect-streams)
                     AUTODETECT_STREAMS=true
